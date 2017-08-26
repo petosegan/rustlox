@@ -1,46 +1,58 @@
 /*
-expression → literal
-           | unary
-           | binary
-           | grouping ;
-
-literal    → NUMBER | STRING | "true" | "false" | "nil" ;
-grouping   → "(" expression ")" ;
-unary      → ( "-" | "!" ) expression ;
-binary     → expression operator expression ;
-operator   → "==" | "!=" | "<" | "<=" | ">" | ">="
-           | "+"  | "-"  | "*" | "/" ;
+expression     → equality ;
+equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+comparison     → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
+addition       → multiplication ( ( "-" | "+" ) multiplication )* ;
+multiplication → unary ( ( "/" | "*" ) unary )* ;
+unary          → ( "!" | "-" ) unary ;
+               | primary ;
+primary        → NUMBER | STRING | "false" | "true" | "nil"
+               | "(" expression ")" ;
 */
 
-enum Expression {
-	Literal(Literal),
-	Unary(Unary),
-	Binary(Box<Expression>, Operator, Box<Expression>),
-	Grouping(Box<Expression>),
+type Expression = Equality;
+
+type Equality = (Comparison, Option<MoreComparisons>);
+
+type Comparison = (Addition, Option<MoreAdditions>);
+
+enum MoreComparisons {
+	NotEqual(Comparison, Option<Box<MoreComparisons>>),
+	Equal(Comparison, Option<Box<MoreComparisons>>),
 }
 
-enum Literal {
-	Number(f64),
-	StringLiteral(String),
-	True,
-	False,
-	Nil,
+type Addition = (Multiplication, Option<MoreMultiplications>);
+
+enum MoreAdditions {
+	Greater(Addition, Option<Box<MoreAdditions>>),
+	Less(Addition, Option<Box<MoreAdditions>>),
+	GreaterEqual(Addition, Option<Box<MoreAdditions>>),
+	LessEqual(Addition, Option<Box<MoreAdditions>>),
+}
+
+type Multiplication = (Unary, Option<MoreUnaries>);
+
+enum MoreMultiplications {
+	Minus(Multiplication, Option<Box<MoreMultiplications>>),
+	Plus(Multiplication, Option<Box<MoreMultiplications>>),
 }
 
 enum Unary {
-	Minus(Box<Expression>),
-	Bang(Box<Expression>),
+	Bang(Box<Unary>),
+	Minus(Box<Unary>),
+	Primary(Primary),
 }
 
-enum Operator {
-	EqualEqual,
-	BangEqual,
-	Less,
-	LessEqual,
-	Greater,
-	GreaterEqual,
-	Plus,
-	Minus,
-	Star,
-	Slash,
+enum MoreUnaries {
+	Divide(Unary, Option<Box<MoreUnaries>>),
+	Times(Unary, Option<Box<MoreUnaries>>),
+}
+
+enum Primary {
+	Number(f64),
+	StringLiteral(String),
+	False,
+	True,
+	Nil,
+	Expression(Box<Expression>)
 }
