@@ -1,3 +1,2 @@
-var x = 1;
-var y = 2;
-print x + y;
+var x = 1.47;
+var y = "breakfast";

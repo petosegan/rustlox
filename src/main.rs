@@ -7,8 +7,12 @@ mod scanner;
 
 fn run(lines: &str) {
 	let mut this_scanner = scanner::Scanner::new(lines);
-	println!("Should run: {}", lines);
-	println!("Yielding tokens: {:?}", &(this_scanner.scan_tokens()));
+	println!("Should run: \n{}", lines);
+	let scanned_tokens = this_scanner.scan_tokens();
+	for token in scanned_tokens {
+		println!("{}", token);
+	}
+	// println!("Yielding tokens: {:?}", &(this_scanner.scan_tokens()));
 }
 
 fn run_prompt() {
