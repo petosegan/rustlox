@@ -6,8 +6,9 @@ use std::io::prelude::*;
 mod scanner;
 
 fn run(lines: &str) {
+	let mut this_scanner = scanner::Scanner::new(lines);
 	println!("Should run: {}", lines);
-	println!("Yielding tokens: {:?}", scanner::scan_tokens(&lines));
+	println!("Yielding tokens: {:?}", &(this_scanner.scan_tokens()));
 }
 
 fn run_prompt() {
