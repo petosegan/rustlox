@@ -4,6 +4,7 @@ use std::io;
 use std::io::prelude::*;
 
 mod scanner;
+mod parse;
 
 fn run(lines: &str) {
 	let mut this_scanner = scanner::Scanner::new(lines);
