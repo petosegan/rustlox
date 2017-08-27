@@ -22,7 +22,8 @@ fn execute(stmt: Statement) -> Result<(), ()>{
         Statement::PrintStmt(e) => {
             let val = evaluate(e)?;
             println!("{:?}", val);
-        }
+        },
+        _ => {return Err(());},
     }
     Ok(())
 }
@@ -37,6 +38,7 @@ fn evaluate(expr: Expression) -> Result<Value, ()> {
 		Expression::Unary(tt, be) => evaluate_unary(tt, *be),
 		Expression::Binary(bel, tt, ber) => evaluate_binary(*bel, tt, *ber),
 		Expression::Grouping(be) => evaluate(*be),
+        _ => Err(()),
 	}
 }
 

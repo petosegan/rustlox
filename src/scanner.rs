@@ -65,6 +65,10 @@ impl<'a> Token<'a> {
     pub fn literal(&self) -> String {
         return self.literal.to_string();
     }
+
+    pub fn lexeme(&self) -> String {
+        return self.lexeme.to_string();
+    }
 }
 
 impl<'a> fmt::Display for Token<'a> {

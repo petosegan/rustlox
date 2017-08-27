@@ -3,10 +3,15 @@
 Expression Grammar
 ==================
 
-program   → statement* EOF ;
+program     → declaration* eof ;
 
-statement → exprStmt
-          | printStmt ;
+declaration → varDecl
+            | statement ;
+
+statement   → exprStmt
+            | printStmt ;
+
+varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
 
 exprStmt  → expression ";" ;
 printStmt → "print" expression ";" ;
@@ -33,7 +38,8 @@ multiplication → unary ( ( "/" | "*" ) unary )* ;
 unary          → ( "!" | "-" ) unary ;
                | primary ;
 primary        → NUMBER | STRING | "false" | "true" | "nil"
-               | "(" expression ")" ;
+               | "(" expression ")" 
+               | IDENTIFIER ;
 */
 
 use scanner::{TokenType, Token};
@@ -41,6 +47,7 @@ use scanner::{TokenType, Token};
 pub enum Statement {
     ExprStmt(Expression),
     PrintStmt(Expression),
+    VarDecl(String, Expression),
 }
 
 #[derive(Debug)]
@@ -53,6 +60,7 @@ pub enum Expression {
 	Unary(TokenType, Box<Expression>),
 	Binary(Box<Expression>, TokenType, Box<Expression>),
 	Grouping(Box<Expression>),
+    Variable(String),
 }
 
 
@@ -69,9 +77,32 @@ impl <'a> Parser <'a> {
     pub fn parse(&mut self) -> Result<Vec<Statement>, ()> {
         let mut result = vec![];
         while !self.is_at_end() {
-            result.push(self.statement()?);
+            result.push(self.declaration()?);
         }
         Ok(result)
+    }
+
+    fn declaration(&mut self) -> Result<Statement, ()> {
+        if self.match_types(vec![TokenType::Var]) {
+            return self.var_declaration();
+        }
+        return self.statement();
+    }
+
+    fn var_declaration(&mut self) -> Result<Statement, ()> {
+        let var_name;
+        {
+            let name_token = self.consume(TokenType::Identifier)?;
+            var_name = name_token.lexeme();
+        }
+
+        let mut initializer = Expression::Nil;
+        if self.match_types(vec![TokenType::Equal]) {
+            initializer = self.expression()?;
+        }
+
+        self.consume(TokenType::Semicolon)?;
+        Ok(Statement::VarDecl(var_name, initializer))
     }
 
     fn statement(&mut self) -> Result<Statement, ()> {
@@ -171,6 +202,10 @@ impl <'a> Parser <'a> {
 			self.consume(TokenType::RightParen)?;
 			return Ok(Expression::Grouping {0: Box::new(expr)});
 		}
+
+        if self.match_types(vec![TokenType::Identifier]) {
+            return Ok(Expression::Variable {0: self.previous().lexeme() });
+        }
 
 		Err(())
 	}
