@@ -43,6 +43,8 @@ fn interpret_unary(operator: TokenType, expr: Expression) -> Result<Value, ()> {
 fn interpret_binary(expr_l: Expression, operator: TokenType, expr_r: Expression) -> Result<Value, ()> {
 	let val_l = interpret(expr_l)?;
 	let val_r = interpret(expr_r)?;
+    println!("left value: {:?}", val_l);
+    println!("right value: {:?}", val_r);
 	match operator {
 		TokenType::EqualEqual => Ok(Value::Boolean(val_l == val_r)),
 		TokenType::BangEqual => Ok(Value::Boolean(val_l != val_r)),
@@ -50,8 +52,8 @@ fn interpret_binary(expr_l: Expression, operator: TokenType, expr_r: Expression)
 		TokenType::LessEqual => {return number_comp(val_l, val_r, |x, y| x <= y); }
 		TokenType::Greater => {return number_comp(val_l, val_r, |x, y| x > y); }
 		TokenType::GreaterEqual => {return number_comp(val_l, val_r, |x, y| x >= y); }
-		TokenType::Plus => {return arith_op(val_l, val_r, |x, y| x / y); }
-		TokenType::Minus => {return arith_op(val_l, val_r, |x, y| x / y); }
+		TokenType::Plus => {return arith_op(val_l, val_r, |x, y| x + y); }
+		TokenType::Minus => {return arith_op(val_l, val_r, |x, y| x - y); }
 		TokenType::Star => { return arith_op(val_l, val_r, |x, y| x * y); }
 		TokenType::Slash => { return arith_op(val_l, val_r, |x, y| x / y); }
 		_ => Err(()),
