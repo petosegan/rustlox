@@ -15,7 +15,6 @@ fn run(lines: &str) {
 	}
 	let mut this_parser = parse::Parser::new(scanned_tokens);
 	println!("\nParses to:\n{:?}", this_parser.expression().unwrap());
-	// println!("Yielding tokens: {:?}", &(this_scanner.scan_tokens()));
 }
 
 fn run_prompt() {
