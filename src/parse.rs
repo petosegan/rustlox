@@ -11,10 +11,10 @@ declaration → varDecl
 statement   → exprStmt
             | printStmt ;
 
-varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
+varDecl     → "var" IDENTIFIER ( "=" expression )? ";" ;
 
-exprStmt  → expression ";" ;
-printStmt → "print" expression ";" ;
+exprStmt    → expression ";" ;
+printStmt   → "print" expression ";" ;
 
 expression → literal
            | unary
@@ -30,7 +30,9 @@ operator   → "==" | "!=" | "<" | "<=" | ">" | ">="
 
 Precedence Grammar
 ==================
-expression     → equality ;
+expression 	   → assignment ;
+assignment     → identifier "=" assignment
+               | equality ;
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
 addition       → multiplication ( ( "-" | "+" ) multiplication )* ;
@@ -62,6 +64,7 @@ pub enum Expression {
 	Binary(Box<Expression>, TokenType, Box<Expression>),
 	Grouping(Box<Expression>),
     Variable(String),
+    Assign(String, Box<Expression>),
 }
 
 
@@ -126,7 +129,24 @@ impl <'a> Parser <'a> {
     }
 
 	pub fn expression(&mut self) -> Result<Expression, &'static str> {
-		return self.equality();
+		return self.assignment();
+	}
+
+	fn assignment(&mut self) -> Result<Expression, &'static str> {
+		let expr = self.equality()?;
+
+		if self.match_types(vec![TokenType::Equal]) {
+			let value = self.assignment()?;
+
+			if let Expression::Variable(var_name) = expr {
+				return Ok(Expression::Assign {0: var_name, 1: Box::new(value)});
+			}
+
+			return Err("invalid assignment target");
+		}
+
+		return Ok(expr);
+
 	}
 
 	fn equality(&mut self) -> Result<Expression, &'static str> {

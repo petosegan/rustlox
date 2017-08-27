@@ -56,6 +56,14 @@ impl Interpreter {
 			Expression::Binary(bel, tt, ber) => self.evaluate_binary(*bel, tt, *ber),
 			Expression::Grouping(be) => self.evaluate(*be),
 	        Expression::Variable(var_name) => self.var_lookup(var_name),
+	        Expression::Assign(var_name, be) => {
+	        	if self.environment.contains_key(&var_name) {
+	        		let var_val = self.evaluate(*be)?;
+	        		self.environment.insert(var_name, var_val.clone());
+	        		return Ok(var_val);
+	        	} else {
+	        		return Err("Undefined variable");
+	        	}},
 		}
 	}
 
