@@ -9,17 +9,18 @@ mod interpret;
 
 fn run(lines: &str) {
 	let this_scanner = scanner::Scanner::new(lines);
-	println!("Should run: \n{}", lines);
+	// println!("Should run: \n{}", lines);
 	let scanned_tokens = this_scanner.scan_tokens();
-	for token in &scanned_tokens {
-		println!("{}", token);
-	}
+	// for token in &scanned_tokens {
+	// 	println!("{}", token);
+	// }
 	let mut this_parser = parse::Parser::new(scanned_tokens);
 	let this_exp = this_parser.expression().unwrap();
-	println!("\nParses to:\n{:?}", this_exp);
+	// println!("\nParses to:\n{:?}", this_exp);
 
 	let this_value = interpret::interpret(this_exp).unwrap();
-	println!("\nInterprets to: {:?}", this_value);
+	// println!("\nInterprets to: {:?}", this_value);
+	println!("{:?}", this_value);
 }
 
 fn run_prompt() {
