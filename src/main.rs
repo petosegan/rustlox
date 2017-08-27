@@ -15,12 +15,12 @@ fn run(lines: &str) {
 	// 	println!("{}", token);
 	// }
 	let mut this_parser = parse::Parser::new(scanned_tokens);
-	let this_exp = this_parser.expression().unwrap();
+	let this_parse = this_parser.parse().unwrap();
 	// println!("\nParses to:\n{:?}", this_exp);
 
-	let this_value = interpret::interpret(this_exp).unwrap();
+	let _ = interpret::interpret(this_parse).unwrap();
 	// println!("\nInterprets to: {:?}", this_value);
-	println!("{:?}", this_value);
+	// println!("{:?}", this_value);
 }
 
 fn run_prompt() {
@@ -43,7 +43,6 @@ fn run_file(filename: &str) {
     let mut contents = String::new();
     f.read_to_string(&mut contents).expect("something went wrong reading the file");
 
-    println!("Should run file {}.", filename);
     run(&contents);
 }
 

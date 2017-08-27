@@ -1,4 +1,4 @@
-use parse::Expression;
+use parse::{Expression, Statement};
 use scanner::TokenType;
 
 #[derive(Debug, PartialEq)]
@@ -9,27 +9,45 @@ pub enum Value {
 	Nil,
 }
 
-pub fn interpret(expr: Expression) -> Result<Value, ()> {
+pub fn interpret(program: Vec<Statement>) -> Result<(), ()> {
+    for stmt in program {
+        execute(stmt)?;
+    }
+    Ok(())
+}
+
+fn execute(stmt: Statement) -> Result<(), ()>{
+    match stmt {
+        Statement::ExprStmt(e) => { evaluate(e)?; },
+        Statement::PrintStmt(e) => {
+            let val = evaluate(e)?;
+            println!("{:?}", val);
+        }
+    }
+    Ok(())
+}
+
+fn evaluate(expr: Expression) -> Result<Value, ()> {
 	match expr {
 		Expression::Number(n) => Ok(Value::Number(n)),
 		Expression::Literal(s) => Ok(Value::StringLiteral(s)),
 		Expression::True => Ok(Value::Boolean(true)),
 		Expression::False => Ok(Value::Boolean(false)),
 		Expression::Nil => Ok(Value::Nil),
-		Expression::Unary(tt, be) => interpret_unary(tt, *be),
-		Expression::Binary(bel, tt, ber) => interpret_binary(*bel, tt, *ber),
-		Expression::Grouping(be) => interpret(*be),
+		Expression::Unary(tt, be) => evaluate_unary(tt, *be),
+		Expression::Binary(bel, tt, ber) => evaluate_binary(*bel, tt, *ber),
+		Expression::Grouping(be) => evaluate(*be),
 	}
 }
 
-fn interpret_unary(operator: TokenType, expr: Expression) -> Result<Value, ()> {
+fn evaluate_unary(operator: TokenType, expr: Expression) -> Result<Value, ()> {
 	match operator {
 		TokenType::Bang => {
-			let expr_value = interpret(expr)?;
+			let expr_value = evaluate(expr)?;
 			return Ok(Value::Boolean(!is_truthy(expr_value)));
 		},
 		TokenType::Minus => {
-			let expr_value = interpret(expr)?;
+			let expr_value = evaluate(expr)?;
 			if let Value::Number(n) = expr_value {
 				return Ok(Value::Number(-n));
 			} else {
@@ -40,9 +58,9 @@ fn interpret_unary(operator: TokenType, expr: Expression) -> Result<Value, ()> {
 	}
 }
 
-fn interpret_binary(expr_l: Expression, operator: TokenType, expr_r: Expression) -> Result<Value, ()> {
-	let val_l = interpret(expr_l)?;
-	let val_r = interpret(expr_r)?;
+fn evaluate_binary(expr_l: Expression, operator: TokenType, expr_r: Expression) -> Result<Value, ()> {
+	let val_l = evaluate(expr_l)?;
+	let val_r = evaluate(expr_r)?;
 	match operator {
 		TokenType::EqualEqual => Ok(Value::Boolean(val_l == val_r)),
 		TokenType::BangEqual => Ok(Value::Boolean(val_l != val_r)),

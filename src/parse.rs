@@ -2,6 +2,15 @@
 
 Expression Grammar
 ==================
+
+program   → statement* EOF ;
+
+statement → exprStmt
+          | printStmt ;
+
+exprStmt  → expression ";" ;
+printStmt → "print" expression ";" ;
+
 expression → literal
            | unary
            | binary
@@ -29,6 +38,11 @@ primary        → NUMBER | STRING | "false" | "true" | "nil"
 
 use scanner::{TokenType, Token};
 
+pub enum Statement {
+    ExprStmt(Expression),
+    PrintStmt(Expression),
+}
+
 #[derive(Debug)]
 pub enum Expression {
 	Number(f64),
@@ -51,6 +65,33 @@ impl <'a> Parser <'a> {
 	pub fn new(tokens: Vec<Token<'a>>) -> Parser<'a> {
 		Parser {tokens: tokens, current: 0}
 	}
+
+    pub fn parse(&mut self) -> Result<Vec<Statement>, ()> {
+        let mut result = vec![];
+        while !self.is_at_end() {
+            result.push(self.statement()?);
+        }
+        Ok(result)
+    }
+
+    fn statement(&mut self) -> Result<Statement, ()> {
+        if self.match_types(vec![TokenType::Print]) {
+            return self.print_statement();
+        }
+        return self.expr_statement();
+    }
+
+    fn print_statement(&mut self) -> Result<Statement, ()> {
+        let expr = self.expression()?;
+        self.consume(TokenType::Semicolon)?;
+        return Ok(Statement::PrintStmt(expr));
+    }
+
+    fn expr_statement(&mut self) -> Result<Statement, ()> {
+        let expr = self.expression()?;
+        self.consume(TokenType::Semicolon)?;
+        return Ok(Statement::ExprStmt(expr));
+    }
 
 	pub fn expression(&mut self) -> Result<Expression, ()> {
 		return self.equality();
