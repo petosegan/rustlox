@@ -25,17 +25,17 @@ pub fn interpret(expr: Expression) -> Result<Value, ()> {
 fn interpret_unary(operator: TokenType, expr: Expression) -> Result<Value, ()> {
 	match operator {
 		TokenType::Bang => {
-								let expr_value = interpret(expr)?;
-								return Ok(Value::Boolean(!is_truthy(expr_value)));
-							},
+			let expr_value = interpret(expr)?;
+			return Ok(Value::Boolean(!is_truthy(expr_value)));
+		},
 		TokenType::Minus => {
-								let expr_value = interpret(expr)?;
-								if let Value::Number(n) = expr_value {
-									return Ok(Value::Number(-n));
-								} else {
-									return Err(());
-								}
-							}
+			let expr_value = interpret(expr)?;
+			if let Value::Number(n) = expr_value {
+				return Ok(Value::Number(-n));
+			} else {
+				return Err(());
+			}
+		}
 		_ => { return Err(()); }
 	}
 }
