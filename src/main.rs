@@ -15,10 +15,16 @@ fn run(lines: &str) {
 	// 	println!("{}", token);
 	// }
 	let mut this_parser = parse::Parser::new(scanned_tokens);
-	let this_parse = this_parser.parse().unwrap();
+	let this_parse = this_parser.parse();
+	if let Err(e) = this_parse {
+		println!("Parse error: {:?}", e);
+	}
 	// println!("\nParses to:\n{:?}", this_exp);
 
-	let _ = interpret::interpret(this_parse).unwrap();
+	let this_interpret = interpret::interpret(this_parse.unwrap());
+	if let Err(e) = this_interpret {
+		println!("Runtime error: {:?}", e);
+	}
 	// println!("\nInterprets to: {:?}", this_value);
 	// println!("{:?}", this_value);
 }

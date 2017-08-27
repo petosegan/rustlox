@@ -69,6 +69,10 @@ impl<'a> Token<'a> {
     pub fn lexeme(&self) -> String {
         return self.lexeme.to_string();
     }
+
+    // pub fn line(&self) -> usize {
+    //     return self.line;
+    // }
 }
 
 impl<'a> fmt::Display for Token<'a> {

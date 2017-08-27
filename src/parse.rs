@@ -74,7 +74,7 @@ impl <'a> Parser <'a> {
 		Parser {tokens: tokens, current: 0}
 	}
 
-    pub fn parse(&mut self) -> Result<Vec<Statement>, ()> {
+    pub fn parse(&mut self) -> Result<Vec<Statement>, &'static str> {
         let mut result = vec![];
         while !self.is_at_end() {
             result.push(self.declaration()?);
@@ -82,14 +82,14 @@ impl <'a> Parser <'a> {
         Ok(result)
     }
 
-    fn declaration(&mut self) -> Result<Statement, ()> {
+    fn declaration(&mut self) -> Result<Statement, &'static str> {
         if self.match_types(vec![TokenType::Var]) {
             return self.var_declaration();
         }
         return self.statement();
     }
 
-    fn var_declaration(&mut self) -> Result<Statement, ()> {
+    fn var_declaration(&mut self) -> Result<Statement, &'static str> {
         let var_name;
         {
             let name_token = self.consume(TokenType::Identifier)?;
@@ -105,30 +105,30 @@ impl <'a> Parser <'a> {
         Ok(Statement::VarDecl(var_name, initializer))
     }
 
-    fn statement(&mut self) -> Result<Statement, ()> {
+    fn statement(&mut self) -> Result<Statement, &'static str> {
         if self.match_types(vec![TokenType::Print]) {
             return self.print_statement();
         }
         return self.expr_statement();
     }
 
-    fn print_statement(&mut self) -> Result<Statement, ()> {
+    fn print_statement(&mut self) -> Result<Statement, &'static str> {
         let expr = self.expression()?;
         self.consume(TokenType::Semicolon)?;
         return Ok(Statement::PrintStmt(expr));
     }
 
-    fn expr_statement(&mut self) -> Result<Statement, ()> {
+    fn expr_statement(&mut self) -> Result<Statement, &'static str> {
         let expr = self.expression()?;
         self.consume(TokenType::Semicolon)?;
         return Ok(Statement::ExprStmt(expr));
     }
 
-	pub fn expression(&mut self) -> Result<Expression, ()> {
+	pub fn expression(&mut self) -> Result<Expression, &'static str> {
 		return self.equality();
 	}
 
-	fn equality(&mut self) -> Result<Expression, ()> {
+	fn equality(&mut self) -> Result<Expression, &'static str> {
 		let mut expr = self.comparison()?;
 
 		while self.match_types(vec![TokenType::BangEqual, TokenType::EqualEqual]) {
@@ -140,7 +140,7 @@ impl <'a> Parser <'a> {
 		return Ok(expr);
 	}
 
-	fn comparison(&mut self) -> Result<Expression, ()> {
+	fn comparison(&mut self) -> Result<Expression, &'static str> {
 		let mut expr = self.addition()?;
 
 		while self.match_types(vec![TokenType::Greater, TokenType::GreaterEqual, TokenType::Less, TokenType::LessEqual]) {
@@ -152,7 +152,7 @@ impl <'a> Parser <'a> {
 		return Ok(expr);
 	}
 
-	fn addition(&mut self) -> Result<Expression, ()> {
+	fn addition(&mut self) -> Result<Expression, &'static str> {
 		let mut expr = self.multiplication()?;
 
 		while self.match_types(vec![TokenType::Minus, TokenType::Plus]) {
@@ -164,7 +164,7 @@ impl <'a> Parser <'a> {
 		return Ok(expr);
 	}
 
-	fn multiplication(&mut self) -> Result<Expression, ()> {
+	fn multiplication(&mut self) -> Result<Expression, &'static str> {
 		let mut expr = self.unary()?;
 
 		while self.match_types(vec![TokenType::Slash, TokenType::Star]) {
@@ -176,7 +176,7 @@ impl <'a> Parser <'a> {
 		return Ok(expr);
 	}
 
-	fn unary(&mut self) -> Result<Expression, ()> {
+	fn unary(&mut self) -> Result<Expression, &'static str> {
 		if self.match_types(vec![TokenType::Bang, TokenType::Minus]) {
 			let operator = self.previous().token_type();
 			let right = self.unary()?;
@@ -185,7 +185,7 @@ impl <'a> Parser <'a> {
 		return self.primary();
 	}
 
-	fn primary(&mut self) -> Result<Expression, ()> {
+	fn primary(&mut self) -> Result<Expression, &'static str> {
 		if self.match_types(vec![TokenType::False]) { return Ok(Expression::False); }
 		if self.match_types(vec![TokenType::True])  { return Ok(Expression::True);  }
 		if self.match_types(vec![TokenType::Nil])   { return Ok(Expression::Nil);   }
@@ -207,12 +207,12 @@ impl <'a> Parser <'a> {
             return Ok(Expression::Variable {0: self.previous().lexeme() });
         }
 
-		Err(())
+		Err("could not match primary")
 	}
 
 	fn match_types(&mut self, types: Vec<TokenType>) -> bool {
 		for token_type in types {
-			if self.check(token_type) {
+			if self.check(&token_type) {
 				self.advance();
 				return true;
 			}
@@ -220,18 +220,18 @@ impl <'a> Parser <'a> {
 		return false;
 	}
 
-	fn check(&self, token_type: TokenType) -> bool {
+	fn check(&self, token_type: &TokenType) -> bool {
 		if self.is_at_end() {return false;}
-		self.peek().token_type() == token_type
+		self.peek().token_type() == *token_type
 	}
 
 	fn is_at_end(&self) -> bool {
 		self.peek().token_type() == TokenType::Eof
 	}
 
-	fn consume(&mut self, token_type: TokenType) -> Result<&Token<'a>, ()> {
-		if self.check(token_type) { return Ok(self.advance()); }
-		Err(())
+	fn consume(&mut self, token_type: TokenType) -> Result<&Token<'a>, &'static str> {
+		if self.check(&token_type) { return Ok(self.advance()); }
+		Err("desired token not found")
 	}
 
 	fn advance(&mut self) -> &Token<'a> {
