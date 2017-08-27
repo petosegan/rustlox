@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TokenType {
 	// Single-character tokens.
 	LeftParen, RightParen, LeftBrace, RightBrace,
@@ -47,15 +47,24 @@ fn keyword_to_token(word: &str) -> TokenType {
 
 #[derive(Debug)]
 pub struct Token<'a> {
-  token_type: TokenType,
-  lexeme: &'a str,
-  literal: &'a str,
-  line: usize,
+    token_type: TokenType,
+    lexeme: &'a str,
+    literal: &'a str,
+    line: usize,
 }
+
 impl<'a> Token<'a> {
 	pub fn new(token_type: TokenType, lexeme: &'a str, literal: &'a str, line: usize) -> Token<'a> {
 		Token{ token_type: token_type, lexeme: lexeme, literal: literal, line: line}
 	}
+
+    pub fn token_type(&self) -> TokenType {
+        return self.token_type.clone();
+    }
+
+    pub fn literal(&self) -> String {
+        return self.literal.to_string();
+    }
 }
 
 impl<'a> fmt::Display for Token<'a> {
@@ -77,14 +86,14 @@ impl<'a> Scanner<'a> {
 		Scanner { source_text: source_text, tokens: vec![] , ix: 0, start: 0, line: 1}
 	}
 
-	pub fn scan_tokens(&mut self) -> &Vec<Token<'a>> {
+	pub fn scan_tokens(mut self) -> Vec<Token<'a>> {
 		while self.ix < self.source_text.len() {
             // ix is at start of next token
 			self.start = self.ix;
 			self.scan_token();
 		}
         self.add_token(TokenType::Eof);
-		return &self.tokens;
+		return self.tokens;
 	}
 
 	fn scan_token(&mut self) {

@@ -7,12 +7,14 @@ mod scanner;
 mod parse;
 
 fn run(lines: &str) {
-	let mut this_scanner = scanner::Scanner::new(lines);
+	let this_scanner = scanner::Scanner::new(lines);
 	println!("Should run: \n{}", lines);
 	let scanned_tokens = this_scanner.scan_tokens();
-	for token in scanned_tokens {
+	for token in &scanned_tokens {
 		println!("{}", token);
 	}
+	let mut this_parser = parse::Parser::new(scanned_tokens);
+	println!("\nParses to:\n{:?}", this_parser.expression().unwrap());
 	// println!("Yielding tokens: {:?}", &(this_scanner.scan_tokens()));
 }
 
