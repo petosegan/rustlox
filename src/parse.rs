@@ -44,13 +44,14 @@ primary        → NUMBER | STRING | "false" | "true" | "nil"
 
 use scanner::{TokenType, Token};
 
+#[derive(Debug)]
 pub enum Statement {
     ExprStmt(Expression),
     PrintStmt(Expression),
     VarDecl(String, Expression),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Expression {
 	Number(f64),
 	Literal(String),
