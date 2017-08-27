@@ -31,6 +31,7 @@ use scanner::{TokenType, Token};
 
 #[derive(Debug)]
 pub enum Expression {
+	Number(f64),
 	Literal(String),
 	True,
 	False,
@@ -117,8 +118,11 @@ impl <'a> Parser <'a> {
 		if self.match_types(vec![TokenType::True])  { return Ok(Expression::True);  }
 		if self.match_types(vec![TokenType::Nil])   { return Ok(Expression::Nil);   }
 
-		if self.match_types(vec![TokenType::Number, TokenType::StringLiteral]) {
+		if self.match_types(vec![TokenType::StringLiteral]) {
 			return Ok(Expression::Literal {0: self.previous().literal() });
+		}
+		if self.match_types(vec![TokenType::Number]) {
+			return Ok(Expression::Number {0: self.previous().literal().parse::<f64>().unwrap()})
 		}
 
 		if self.match_types(vec![TokenType::LeftParen]) {

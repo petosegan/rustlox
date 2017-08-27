@@ -5,6 +5,7 @@ use std::io::prelude::*;
 
 mod scanner;
 mod parse;
+mod interpret;
 
 fn run(lines: &str) {
 	let this_scanner = scanner::Scanner::new(lines);
@@ -14,7 +15,11 @@ fn run(lines: &str) {
 		println!("{}", token);
 	}
 	let mut this_parser = parse::Parser::new(scanned_tokens);
-	println!("\nParses to:\n{:?}", this_parser.expression().unwrap());
+	let this_exp = this_parser.expression().unwrap();
+	println!("\nParses to:\n{:?}", this_exp);
+
+	let this_value = interpret::interpret(this_exp).unwrap();
+	println!("\nInterprets to: {:?}", this_value);
 }
 
 fn run_prompt() {
