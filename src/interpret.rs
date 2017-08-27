@@ -46,72 +46,36 @@ fn interpret_binary(expr_l: Expression, operator: TokenType, expr_r: Expression)
 	match operator {
 		TokenType::EqualEqual => Ok(Value::Boolean(val_l == val_r)),
 		TokenType::BangEqual => Ok(Value::Boolean(val_l != val_r)),
-		TokenType::Less => {
-			if let Value::Number(n_l) = val_l {
-				if let Value::Number(n_r) = val_r {
-					return Ok(Value::Boolean(n_l < n_r));
-				}
-			}
-			return Err(())
-		},
-		TokenType::LessEqual => {
-			if let Value::Number(n_l) = val_l {
-				if let Value::Number(n_r) = val_r {
-					return Ok(Value::Boolean(n_l <= n_r));
-				}
-			}
-			return Err(())
-		},
-		TokenType::Greater => {
-			if let Value::Number(n_l) = val_l {
-				if let Value::Number(n_r) = val_r {
-					return Ok(Value::Boolean(n_l > n_r));
-				}
-			}
-			return Err(())
-		},
-		TokenType::GreaterEqual => {
-			if let Value::Number(n_l) = val_l {
-				if let Value::Number(n_r) = val_r {
-					return Ok(Value::Boolean(n_l >= n_r));
-				}
-			}
-			return Err(())
-		},
-		TokenType::Plus => {
-			if let Value::Number(n_l) = val_l {
-				if let Value::Number(n_r) = val_r {
-					return Ok(Value::Number(n_l + n_r));
-				}
-			}
-			return Err(())
-		}
-		TokenType::Minus => {
-			if let Value::Number(n_l) = val_l {
-				if let Value::Number(n_r) = val_r {
-					return Ok(Value::Number(n_l - n_r));
-				}
-			}
-			return Err(())
-		}
-		TokenType::Star => {
-			if let Value::Number(n_l) = val_l {
-				if let Value::Number(n_r) = val_r {
-					return Ok(Value::Number(n_l * n_r));
-				}
-			}
-			return Err(())
-		}
-		TokenType::Slash => {
-			if let Value::Number(n_l) = val_l {
-				if let Value::Number(n_r) = val_r {
-					return Ok(Value::Number(n_l / n_r));
-				}
-			}
-			return Err(())
-		}
+		TokenType::Less => {return number_comp(val_l, val_r, |x, y| x < y); }
+		TokenType::LessEqual => {return number_comp(val_l, val_r, |x, y| x <= y); }
+		TokenType::Greater => {return number_comp(val_l, val_r, |x, y| x > y); }
+		TokenType::GreaterEqual => {return number_comp(val_l, val_r, |x, y| x >= y); }
+		TokenType::Plus => {return arith_op(val_l, val_r, |x, y| x / y); }
+		TokenType::Minus => {return arith_op(val_l, val_r, |x, y| x / y); }
+		TokenType::Star => { return arith_op(val_l, val_r, |x, y| x * y); }
+		TokenType::Slash => { return arith_op(val_l, val_r, |x, y| x / y); }
 		_ => Err(()),
 	}
+}
+
+fn arith_op<F>(val_r: Value, val_l: Value, op: F) -> Result<Value, ()> 
+	where F: Fn(f64, f64) -> f64 {
+	if let Value::Number(n_l) = val_l {
+		if let Value::Number(n_r) = val_r {
+			return Ok(Value::Number(op(n_l, n_r)));
+		}
+	}
+	return Err(());
+}
+
+fn number_comp<F>(val_r: Value, val_l: Value, op: F) -> Result<Value, ()> 
+	where F: Fn(f64, f64) -> bool {
+	if let Value::Number(n_l) = val_l {
+		if let Value::Number(n_r) = val_r {
+			return Ok(Value::Boolean(op(n_l, n_r)));
+		}
+	}
+	return Err(());
 }
 
 fn is_truthy(val: Value) -> bool {
